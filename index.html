@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="7×7 토큰 제비의 공개 결과와 힌트를 기록하고 남은 구성의 조건부 기대값을 확인하는 확률 분석 도구입니다.">
+<title>제비EV | 7×7 제비 확률 분석기</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--line:#dce1ea;--text:#172033;--muted:#687386;--accent:#315efb;--hint:#fff1bd;--near:#e7f4ff;--open:#edf0f4}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55}
+a{color:inherit}.wrap{max-width:1080px;margin:auto;padding:0 18px}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}.nav{min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-weight:800;text-decoration:none}.links{display:flex;gap:16px;flex-wrap:wrap}.links a{font-size:14px;text-decoration:none;color:var(--muted)}
+.hero{padding:42px 0 24px}.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px}.hero p{max-width:720px;color:var(--muted);margin:0}
+section{scroll-margin-top:78px}.section{padding:28px 0}.section h2{font-size:24px;margin:0 0 12px}.section>p{color:var(--muted);max-width:800px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}.stat,.panel,.content-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px}.stat small{display:block;color:var(--muted)}.stat b{font-size:20px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.board{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.cell{aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:#fff;min-width:0;padding:2px;cursor:pointer;font-weight:700;color:var(--text)}.cell small{display:block;font-weight:500;color:var(--muted);font-size:10px}.cell.sel{outline:3px solid rgba(49,94,251,.22);border-color:var(--accent)}.cell.hint{background:var(--hint);border-style:dashed}.cell.near{box-shadow:inset 0 0 0 2px #86bce7}.cell.open{background:var(--open);opacity:.82}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}.btn{min-height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font-size:14px}.wide{grid-column:1/-1}.selected{font-weight:750;margin-bottom:10px}.remaining,.info{font-size:13px}.info{color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.content-card h3{margin:0 0 7px;font-size:17px}.content-card p{margin:0;color:var(--muted);font-size:14px}
+.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#f0f2f6;border-radius:8px;padding:10px;overflow:auto}
+.ad-slot{border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:12px;margin:18px 0;background:#fafbfc}
+.notice{background:#fff;border-left:4px solid var(--accent);padding:12px 14px;border-radius:8px;color:var(--muted);font-size:13px}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:24px 0 40px;color:var(--muted);font-size:12px}
+@media(max-width:760px){.wrap{padding:0 10px}.links{gap:9px}.links a{font-size:12px}.stats{grid-template-columns:1fr 1fr}.layout,.grid3{grid-template-columns:1fr}.board{gap:4px}.cell{font-size:12px;border-radius:6px}.cell small{font-size:8px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="#">제비EV</a><nav class="links"><a href="#analyzer">분석기</a><a href="#guide">사용법</a><a href="#method">계산 원리</a><a href="#about">소개</a><a href="privacy.html">개인정보</a></nav></div></header>
+<main>
+<div class="wrap hero"><h1>7×7 제비판을<br>확률로 기록해 보세요.</h1><p>공개된 결과와 위치 힌트를 직접 기록하면 남은 제비 구성과 조건부 기대값을 계산합니다. 모든 계산은 사용자의 브라우저에서 이루어집니다.</p></div>
+
+<section id="analyzer" class="section"><div class="wrap">
+<h2>확률 분석기</h2><p>칸을 선택한 뒤 공개된 결과를 입력하세요. 노란색은 2+ 위치 힌트, 테두리가 표시된 칸은 C○의 좌우 칸입니다.</p>
+<div class="stats"><div class="stat"><small>뽑은 횟수</small><b id="draws">0 / 49</b></div><div class="stat"><small>획득 토큰</small><b id="got">0</b></div><div class="stat"><small>남은 판 평균 EV</small><b id="bev">1.898</b></div><div class="stat"><small>남은 2+ 평균 EV</small><b id="hev">3.316</b></div></div>
+<div class="layout"><div class="panel"><div id="board" class="board"></div></div><aside class="panel">
+<div id="sel" class="selected">선택한 칸: 없음</div><div class="btns">
+<button class="btn result" data-v="15">15토큰</button><button class="btn result" data-v="5">5토큰</button><button class="btn result" data-v="3">3토큰</button><button class="btn result" data-v="2">2토큰</button><button class="btn result" data-v="1B">1 · B</button><button class="btn result" data-v="1C">1 · C○</button><button class="btn wide" id="hint">2+ 힌트 표시/해제</button><button class="btn wide" id="clear">선택 칸 기록 취소</button><button class="btn wide" id="reset">새 판</button>
+</div><div id="remain" class="remaining"></div><div id="info" class="info">칸을 선택하세요.</div></aside></div>
+<div class="ad-slot">향후 광고 승인을 받은 경우 사용할 수 있는 광고 영역 예시 — 현재는 광고 코드가 없습니다.</div>
+</div></section>
+
+<section id="guide" class="section"><div class="wrap"><h2>사용 방법</h2><div class="grid3">
+<div class="content-card"><h3>1. 칸 선택</h3><p>실제 제비판에서 선택한 위치와 같은 칸을 누릅니다. 행과 열 위치가 선택 정보에 표시됩니다.</p></div>
+<div class="content-card"><h3>2. 결과 기록</h3><p>15·5·3·2토큰 또는 1토큰 B/C○ 중 실제로 공개된 결과를 입력합니다. 잘못 입력한 경우 기록 취소가 가능합니다.</p></div>
+<div class="content-card"><h3>3. 힌트 기록</h3><p>2토큰 이상이라고 알려진 정확한 위치가 있다면 해당 칸에 2+ 힌트를 표시합니다. 조건에 맞춰 EV가 다시 계산됩니다.</p></div>
+</div><p class="notice">표시되는 EV는 확률을 이해하기 위한 정보입니다. 특정 칸 선택이나 유료 참여를 권하는 기능은 제공하지 않습니다.</p></div></section>
+
+<section id="method" class="section"><div class="wrap"><h2>계산 원리</h2>
+<p>초기 판은 49장으로 가정합니다. 구성은 15토큰 1장, 5토큰 2장, 3토큰 6장, 2토큰 10장, 1토큰 B 18장, 1토큰 C○ 12장으로 총 93토큰입니다.</p>
+<div class="grid3"><div class="content-card"><h3>기본 기대값</h3><p>아무 정보가 없는 새 판의 평균은 총 토큰을 총 제비 수로 나눠 계산합니다.</p><div class="formula">93 ÷ 49 ≈ 1.898</div></div>
+<div class="content-card"><h3>결과가 공개되면</h3><p>이미 뽑힌 제비의 수와 토큰을 전체 구성에서 제거한 뒤 남은 평균을 다시 계산합니다.</p><div class="formula">남은 토큰 ÷ 남은 칸</div></div>
+<div class="content-card"><h3>위치 정보</h3><p>2+ 힌트는 2·3·5·15만 후보로 사용합니다. C○의 좌우 칸은 C○ 후보에서 제외하는 간이 조건부 모델을 적용합니다.</p></div></div>
+<p>현재 모델은 알려진 제비 종류와 직접 입력한 위치 정보를 기반으로 합니다. 12개의 C○가 7×7 전체에서 비인접하도록 배치되는 모든 경우를 완전 열거하는 정밀 베이지안 모델은 아직 적용하지 않았습니다.</p>
+</div></section>
+
+<section id="about" class="section"><div class="wrap"><h2>사이트 소개</h2><p>이 사이트는 7×7 확률 판의 상태를 기록하고 기대값 계산 과정을 쉽게 확인하기 위한 비공식 분석 도구입니다. 특정 게임의 공식 서비스가 아니며, 상표권자의 공식 사이트 또는 제휴 서비스임을 의미하지 않습니다.</p>
+<div class="content-card"><h3>데이터 처리</h3><p>현재 버전은 회원가입이나 서버 데이터베이스를 사용하지 않습니다. 입력한 판 상태는 브라우저의 localStorage에만 저장되어 같은 브라우저에서 다시 열었을 때 복원됩니다. 자세한 내용은 개인정보 처리 안내를 확인하세요.</p></div></div></section>
+</main>
+<footer><div class="wrap">© 2026 제비EV · 비공식 확률 분석 도구 · <a href="privacy.html">개인정보 처리 안내</a></div></footer>
+<script>
+const INIT={"15":1,"5":2,"3":6,"2":10,"1B":18,"1C":12},VAL={"15":15,"5":5,"3":3,"2":2,"1B":1,"1C":1},LAB={"15":"15","5":"5","3":"3","2":"2","1B":"B","1C":"C○"};
+let cells,selected=null;try{cells=JSON.parse(localStorage.getItem("lottery49")||"null")}catch(e){}if(!Array.isArray(cells)||cells.length!==49)cells=Array.from({length:49},()=>({result:null,hint:false}));
+const $=s=>document.querySelector(s);
+function rem(){let r={...INIT};cells.forEach(c=>{if(c.result)r[c.result]--});return r}
+function near(){let s=new Set();cells.forEach((c,i)=>{if(c.result==="1C"){let col=i%7;if(col>0&&!cells[i-1].result)s.add(i-1);if(col<6&&!cells[i+1].result)s.add(i+1)}});return s}
+function ev(i,r,n){let c=cells[i];if(c.result)return VAL[c.result];let k=Object.keys(r).filter(x=>r[x]>0);if(c.hint)k=k.filter(x=>VAL[x]>=2);if(n.has(i))k=k.filter(x=>x!=="1C");let q=k.reduce((a,x)=>a+r[x],0);return q?k.reduce((a,x)=>a+r[x]*VAL[x],0)/q:0}
+function save(){try{localStorage.setItem("lottery49",JSON.stringify(cells))}catch(e){}}
+function render(){let r=rem(),n=near(),d=cells.filter(c=>c.result).length,g=cells.reduce((a,c)=>a+(c.result?VAL[c.result]:0),0),rn=Object.values(r).reduce((a,b)=>a+b,0),rt=Object.keys(r).reduce((a,k)=>a+r[k]*VAL[k],0),hn=r["15"]+r["5"]+r["3"]+r["2"],ht=15*r["15"]+5*r["5"]+3*r["3"]+2*r["2"];
+$("#draws").textContent=d+" / 49";$("#got").textContent=g;$("#bev").textContent=rn?(rt/rn).toFixed(3):"—";$("#hev").textContent=hn?(ht/hn).toFixed(3):"—";$("#remain").innerHTML="<p><b>남은 제비</b><br>15: "+r["15"]+" · 5: "+r["5"]+" · 3: "+r["3"]+" · 2: "+r["2"]+"<br>B: "+r["1B"]+" · C○: "+r["1C"]+"</p>";
+let b=$("#board");b.innerHTML="";cells.forEach((c,i)=>{let x=document.createElement("button");x.className="cell";if(i===selected)x.classList.add("sel");if(c.result)x.classList.add("open");else if(c.hint)x.classList.add("hint");if(!c.result&&n.has(i))x.classList.add("near");if(c.result)x.textContent=LAB[c.result];else{x.innerHTML=(c.hint?"2+":n.has(i)?"○옆":"·")+"<small>EV "+ev(i,r,n).toFixed(2)+"</small>"}x.addEventListener("click",()=>{selected=i;render()});b.appendChild(x)});
+if(selected===null){$("#sel").textContent="선택한 칸: 없음";$("#info").textContent="칸을 선택하세요."}else{let c=cells[selected],p=(Math.floor(selected/7)+1)+"행 "+(selected%7+1)+"열";$("#sel").textContent="선택한 칸: "+p;$("#info").textContent=c.result?"공개 결과: "+LAB[c.result]:"현재 조건부 EV: "+ev(selected,r,n).toFixed(3)+(c.hint?" · 2+ 힌트":"")+(n.has(selected)?" · C○ 옆칸":"")}save()}
+document.querySelectorAll(".result").forEach(b=>b.addEventListener("click",()=>{if(selected===null)return alert("먼저 칸을 선택하세요.");let k=b.dataset.v,r=rem(),old=cells[selected].result;if(old===k)return;if(old)r[old]++;if(r[k]<=0)return alert("그 종류의 남은 제비가 없습니다.");if(cells[selected].hint&&VAL[k]<2)return alert("2+ 힌트 칸에는 1토큰을 입력할 수 없습니다.");cells[selected]={result:k,hint:false};render()}));
+$("#hint").addEventListener("click",()=>{if(selected===null)return alert("먼저 칸을 선택하세요.");if(cells[selected].result)return alert("이미 공개된 칸입니다.");cells[selected].hint=!cells[selected].hint;render()});$("#clear").addEventListener("click",()=>{if(selected===null)return;cells[selected]={result:null,hint:false};render()});$("#reset").addEventListener("click",()=>{if(confirm("모든 기록을 초기화할까요?")){cells=Array.from({length:49},()=>({result:null,hint:false}));selected=null;render()}});render();
+</script>
+</body></html>
